@@ -108,7 +108,7 @@ jobs:
         uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist-${{ matrix.target }} --find-interpreter --manifest-path bindings/python/Cargo.toml
+          args: --release --strip --out dist-${{ matrix.target }} --find-interpreter --manifest-path bindings/python/Cargo.toml
           sccache: 'true'
           manylinux: auto
       
