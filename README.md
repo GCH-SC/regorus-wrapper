@@ -1,8 +1,4 @@
 <div align="center">
-<img src="./logo.png" width="60%">
-</div>
-
-<div align="center">
     <p style="font-size: xxx-large">
     <strong>
     regorus-python-builder
