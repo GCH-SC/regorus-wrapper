@@ -1,28 +1,26 @@
 <div align="center">
-    <p style="font-size: xxx-large">
-    <strong>
-    regorus-python-builder
-    </strong>
-    </p>
-    <p>
-    <!-- Start Short Description -->Build regorus package<!-- End Short Description -->
-    </p>
+    <h1>regorus-wrapper</h1>
+    <p>Build and publish regorus</p>
 </div>
 
+---
+
 # Description
-<!-- Start Long Description -->
-Build regorus package...
-<!-- End Long Description -->
+
+This package installs the correct prebuilt `regorus` wheel for your platform and Python version via GitHub Releases.
+
+You must use `pip >= 19.0`.
 
 <a href="#install">1. Install</a><br/>
- - To install regorus:
+
+- To install regorus:
 ```sh
-pip install regorus
+pip install regorus-wrapper
 ```
 
-- To upgrade to loggerpy new version:
+- To upgrade to regorus new version:
 ```sh
-pip install regorus --upgrade
+pip install regorus-wrapper --upgrade
 ```
 
 # Requirements
