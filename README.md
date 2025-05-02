@@ -15,12 +15,12 @@ You must use `pip >= 19.0`.
 
 - To install regorus:
 ```sh
-pip install regorus-wrapper
+pip install regorus
 ```
 
 - To upgrade to regorus new version:
 ```sh
-pip install regorus-wrapper --upgrade
+pip install regorus --upgrade
 ```
 
 # Requirements
