@@ -33,19 +33,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Rust target (skip for universal2)
+      - name: Install Rust target (only for real Rust triples)
         if: matrix.target != 'universal2-apple-darwin'
         run: rustup target add ${{ matrix.target }}
 
-      - name: Build Python extension (skip for universal2)
-        if: matrix.target != 'universal2-apple-darwin'
-        run: |
-          cargo fetch
-          cargo clippy --all-targets --no-deps -- -Dwarnings
-          cargo build --release --target ${{ matrix.target }} --frozen
-        working-directory: bindings/python
-
-      - name: Build wheels
+      - name: Build wheels with maturin
         uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
         with:
           target: ${{ matrix.target }}
@@ -55,7 +47,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-${{ matrix.target }}-py${{ matrix.python-version }}
           path: dist
 
   linux:
@@ -106,7 +98,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-${{ matrix.target }}-py${{ matrix.python-version }}
           path: dist
               
   windows:
@@ -157,7 +149,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-${{ matrix.target }}-py${{ matrix.python-version }}
           path: dist
 
   release:
@@ -171,7 +163,7 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          name: wheels
+          path: dist
       
       - name: Publish to PyPI
         uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
