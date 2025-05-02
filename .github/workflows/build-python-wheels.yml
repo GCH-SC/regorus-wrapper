@@ -12,7 +12,10 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.10']
-        target: [x86_64-apple-darwin, aarch64-apple-darwin, universal2-apple-darwin]
+        target:
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
+          - universal2-apple-darwin
 
     steps:
       - name: Check out the main repository
@@ -30,10 +33,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Rust target
+      - name: Install Rust target (if not universal2)
+        if: matrix.target != 'universal2-apple-darwin'
         run: rustup target add ${{ matrix.target }}
 
-      - name: Build Python extension
+      - name: Build Python extension (skip for universal2)
+        if: matrix.target != 'universal2-apple-darwin'
         run: |
           cargo fetch
           cargo clippy --all-targets --no-deps -- -Dwarnings
@@ -82,7 +87,8 @@ jobs:
       - name: Install Rust target
         run: rustup target add ${{ matrix.target }}
 
-      - name: Build Python extension
+      - name: Build Python extension (native only)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
         run: |
           cargo fetch
           cargo clippy --all-targets --no-deps -- -Dwarnings
@@ -108,9 +114,11 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.10']
-        target:
-          - x86_64-pc-windows-msvc
-          - i686-pc-windows-msvc
+        include:
+          - target: x86_64-pc-windows-msvc
+            python-arch: x64
+          - target: i686-pc-windows-msvc
+            python-arch: x86
 
     steps:
       - name: Check out the main repository
@@ -127,6 +135,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.python-arch }}
 
       - name: Install Rust target
         run: rustup target add ${{ matrix.target }}
@@ -150,7 +159,7 @@ jobs:
         with:
           name: wheels
           path: dist
-  
+
   release:
     name: Release
     runs-on: ubuntu-latest
