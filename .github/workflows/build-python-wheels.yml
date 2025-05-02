@@ -144,11 +144,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [linux, macos, windows]
     steps:
-    - name: Check out the main repository
-      uses: actions/checkout@v4
+      - name: Check out the main repository
+        uses: actions/checkout@v4
     
-    - name: Download Artifact
-      - uses: actions/download-artifact@v4
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
         with:
           name: wheels
       
