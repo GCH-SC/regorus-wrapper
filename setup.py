@@ -1,4 +1,11 @@
+import os
 import setuptools
+
+"""
+Ensures the "dist" directory exists to store the built package.
+"""
+os.makedirs("dist", exist_ok=True)
+
 
 setuptools.setup(
     name="regorus-wrapper",
