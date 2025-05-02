@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.10']
-        target: [x86_64, aarch64, universal2-apple-darwin]
+        target: [x86_64-apple-darwin, aarch64-apple-darwin, universal2-apple-darwin]
 
     steps:
       - name: Check out the main repository
@@ -30,11 +30,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install Rust target
+        run: rustup target add ${{ matrix.target }}
+
       - name: Build Python extension
         run: |
           cargo fetch
           cargo clippy --all-targets --no-deps -- -Dwarnings
-          cargo build --release --target ${{ matrix.host.target }} --frozen
+          cargo build --release --target ${{ matrix.target }} --frozen
         working-directory: bindings/python
 
       - name: Build wheels
@@ -43,25 +46,27 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --manifest-path bindings/python/Cargo.toml --offline --strip
           sccache: 'true'
-      
+
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: dist
 
-  
   linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.10']
-        target: [x86_64, aarch64, armv7]
+        target:
+          - x86_64-unknown-linux-gnu
+          - aarch64-unknown-linux-gnu
+          - armv7-unknown-linux-gnueabihf
 
     steps:
       - name: Check out the main repository
         uses: actions/checkout@v4
-      
+
       - name: Check out regorus code
         uses: actions/checkout@v4
         with:
@@ -73,7 +78,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-        
+
+      - name: Install Rust target
+        run: rustup target add ${{ matrix.target }}
+
       - name: Build Python extension
         run: |
           cargo fetch
@@ -88,56 +96,60 @@ jobs:
           args: --release --out dist --manifest-path bindings/python/Cargo.toml --offline --strip
           sccache: 'true'
           manylinux: auto
-      
+
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: dist
     
-  windows:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: ['3.10']
-        target: [x64, x86]
+windows:
+  runs-on: windows-latest
+  strategy:
+    matrix:
+      python-version: ['3.10']
+      target:
+        - x86_64-pc-windows-msvc
+        - i686-pc-windows-msvc
 
-    steps:
-      - name: Check out the main repository
-        uses: actions/checkout@v4
+  steps:
+    - name: Check out the main repository
+      uses: actions/checkout@v4
 
-      - name: Check out regorus code
-        uses: actions/checkout@v4
-        with:
-          repository: GCH-SC/regorus
-          path: .
-          ref: main
+    - name: Check out regorus code
+      uses: actions/checkout@v4
+      with:
+        repository: GCH-SC/regorus
+        path: .
+        ref: main
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.target }}
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
 
-      - name: Build Python extension
-        run: |
-          cargo fetch
-          cargo clippy --all-targets --no-deps -- -Dwarnings
-          cargo build --release --target ${{ matrix.host.target }} --frozen
-        working-directory: bindings/python
+    - name: Install Rust target
+      run: rustup target add ${{ matrix.target }}
 
-      - name: Build wheels
-        uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
-        with:
-          target: ${{ matrix.target }}
-          args: --release --out dist --manifest-path bindings/python/Cargo.toml --frozen --strip
-          sccache: 'true'
-      
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels
-          path: dist
+    - name: Build Python extension
+      run: |
+        cargo fetch
+        cargo clippy --all-targets --no-deps -- -Dwarnings
+        cargo build --release --target ${{ matrix.target }} --frozen
+      working-directory: bindings/python
+
+    - name: Build wheels
+      uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
+      with:
+        target: ${{ matrix.target }}
+        args: --release --out dist --manifest-path bindings/python/Cargo.toml --frozen --strip
+        sccache: 'true'
+
+    - name: Upload wheels
+      uses: actions/upload-artifact@v4
+      with:
+        name: wheels
+        path: dist
   
   release:
     name: Release
