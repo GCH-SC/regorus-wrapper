@@ -9,7 +9,7 @@ os.makedirs("dist", exist_ok=True)
 
 setuptools.setup(
     name="regorus-wrapper",
-    version="0.2.2",
+    version="0.4.0",
     author="Haim Shulner",
     author_email="haim.shulner@gmail.com",
     include_package_data=True,
