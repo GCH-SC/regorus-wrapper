@@ -19,7 +19,6 @@ jobs:
           - x86_64-apple-darwin
           - aarch64-apple-darwin
           - universal2-apple-darwin
-
     steps:
       - name: Check out the main repository
         uses: actions/checkout@v4
@@ -27,7 +26,7 @@ jobs:
       - name: Check out regorus code
         uses: actions/checkout@v4
         with:
-          repository: GCH-SC/regorus
+          repository: microsoft/regorus
           path: .
           ref: main
 
@@ -65,7 +64,6 @@ jobs:
           - x86_64-unknown-linux-gnu
           - aarch64-unknown-linux-gnu
           - armv7-unknown-linux-gnueabihf
-
     steps:
       - name: Check out the main repository
         uses: actions/checkout@v4
@@ -73,7 +71,7 @@ jobs:
       - name: Check out regorus code
         uses: actions/checkout@v4
         with:
-          repository: GCH-SC/regorus
+          repository: microsoft/regorus
           path: .
           ref: main
 
@@ -107,8 +105,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.target }}-py${{ matrix.python-version }}
-          path: dist
-              
+          path: dist           
   windows:
     runs-on: windows-latest
     strategy:
@@ -130,7 +127,7 @@ jobs:
       - name: Check out regorus code
         uses: actions/checkout@v4
         with:
-          repository: GCH-SC/regorus
+          repository: microsoft/regorus
           path: .
           ref: main
 
@@ -182,10 +179,17 @@ jobs:
           find dist -name '*.whl' -exec cp {} flat_dist/ \;
         shell: bash
 
-      - name: Publish to PyPI
-        uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
-        env:
-          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Zip wheels
+        run: |
+          zip -j flat_dist/wheels.zip flat_dist/*.whl
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          command: upload
-          args: --non-interactive --skip-existing flat_dist/*
+          tag_name: ${{ github.ref_name }}  # or pass a custom tag variable here
+          name: Release ${{ github.ref_name }}
+          body: |
+            Wheels for ${{ github.ref_name }}
+          files: flat_dist/wheels.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
