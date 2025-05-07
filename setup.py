@@ -24,9 +24,9 @@ setuptools.setup(
         "regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-manylinux_2_34_x86_64.whl ; sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.11'",
 
         # Linux (manylinux_2_34)
-        "regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl ; sys_platform == 'linux' and platform_machine == 'aarch64' and python_version == '3.11'",
-        "regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl ; sys_platform == 'linux' and platform_machine == 'armv7l' and python_version == '3.11'",
-        "regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl ; sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.11'",
+        #"regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl ; sys_platform == 'linux' and platform_machine == 'aarch64' and python_version == '3.11'",
+        #"regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl ; sys_platform == 'linux' and platform_machine == 'armv7l' and python_version == '3.11'",
+        #"regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl ; sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.11'",
 
         # Windows (win32)
         "regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-win32.whl ; sys_platform == 'win32' and python_version == '3.11'",
