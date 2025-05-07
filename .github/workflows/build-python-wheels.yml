@@ -64,6 +64,9 @@ jobs:
           - x86_64-unknown-linux-gnu
           - aarch64-unknown-linux-gnu
           - armv7-unknown-linux-gnueabihf
+        manylinux:
+          - '2_34'
+          - '2014'
     steps:
       - name: Check out the main repository
         uses: actions/checkout@v4
@@ -99,13 +102,14 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --manifest-path bindings/python/Cargo.toml --strip
           sccache: 'true'
-          manylinux: 2_34 2014
+          manylinux: ${{ matrix.manylinux }}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.target }}-py${{ matrix.python-version }}
-          path: dist           
+          name: wheels-${{ matrix.target }}-${{ matrix.manylinux }}-py${{ matrix.python-version }}
+          path: dist
+
   windows:
     runs-on: windows-latest
     strategy:
