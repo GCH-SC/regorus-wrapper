@@ -101,12 +101,7 @@ jobs:
         with:
           name: wheels-x86_64-${{ matrix.manylinux }}-py${{ matrix.python-version }}
           path: dist
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-${{ matrix.target }}-py${{ matrix.python-version }}
-          path: dist           
+       
   windows:
     runs-on: windows-latest
     strategy:
