@@ -99,7 +99,7 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --manifest-path bindings/python/Cargo.toml --strip
           sccache: 'true'
-          manylinux: manylinux_2_34,manylinux2014
+          manylinux: 2_34 2014
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
