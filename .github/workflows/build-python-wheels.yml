@@ -39,7 +39,7 @@ jobs:
         if: matrix.target != 'universal2-apple-darwin'
         run: rustup target add ${{ matrix.target }}
 
-      - name: Build wheels with maturin
+      - name: Build wheels
         uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
         with:
           target: ${{ matrix.target }}
@@ -99,7 +99,7 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --manifest-path bindings/python/Cargo.toml --strip
           sccache: 'true'
-          manylinux: auto
+          manylinux: manylinux_2_34,manylinux2014
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
