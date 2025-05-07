@@ -65,7 +65,7 @@ jobs:
           - aarch64-unknown-linux-gnu
           - armv7-unknown-linux-gnueabihf
         manylinux:
-          #- manylinux_2014
+          - manylinux_2014
           - auto
     steps:
       - name: Check out the main repository
@@ -94,9 +94,9 @@ jobs:
           cargo build --release --target ${{ matrix.target }} --frozen
         working-directory: bindings/python
 
-      #- name: Setup QEMU
-      #  uses: docker/setup-qemu-action@v1
-        #if: matrix.manylinux == 'manylinux_2014'
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+        if: matrix.manylinux == 'manylinux_2014'
   
       - name: Build wheels
         uses: PyO3/maturin-action@v1
