@@ -65,8 +65,9 @@ jobs:
           - aarch64-unknown-linux-gnu
           - armv7-unknown-linux-gnueabihf
         manylinux:
-          - '2_34'
-          - '2014'
+          - manylinux_2_34
+          - manylinux_2014
+
     steps:
       - name: Check out the main repository
         uses: actions/checkout@v4
@@ -95,7 +96,7 @@ jobs:
         working-directory: bindings/python
 
       - name: Build wheels
-        uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
+        uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3
         env:
           CARGO_TARGET_DIR: ${{ github.workspace }}/target
         with:
