@@ -56,38 +56,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - python-version: '3.10'
-            python-abi: cp310-cp310
-            manylinux: manylinux_2014
-          - python-version: '3.10'
-            python-abi: cp310-cp310
-            manylinux: manylinux_2_34
-          - python-version: '3.11'
-            python-abi: cp311-cp311
-            manylinux: manylinux_2014
-          - python-version: '3.11'
-            python-abi: cp311-cp311
-            manylinux: manylinux_2_34
-          - python-version: '3.12'
-            python-abi: cp312-cp312
-            manylinux: manylinux_2014
-          - python-version: '3.12'
-            python-abi: cp312-cp312
-            manylinux: manylinux_2_34
-
-    container:
-      image: quay.io/pypa/${{ matrix.manylinux }}_x86_64
-      options: --privileged
-
+        python-version:
+          - '3.10'
+          - '3.11'
+          - '3.12'
+        target:
+          - x86_64-unknown-linux-gnu
+          - aarch64-unknown-linux-gnu
+          - armv7-unknown-linux-gnueabihf
     steps:
-      - name: Install system dependencies
-        run: |
-          yum install -y git gcc gcc-c++ make openssl-devel
-          curl -sSf https://sh.rustup.rs | sh -s -- -y
-          source $HOME/.cargo/env
-          rustup show
-
       - name: Check out the main repository
         uses: actions/checkout@v4
 
@@ -98,26 +75,37 @@ jobs:
           path: .
           ref: main
 
-      - name: Install Python packages
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Rust target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build Python extension (only native)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
         run: |
-          /opt/python/${{ matrix.python-abi }}/bin/pip install --upgrade pip setuptools wheel maturin
+          cargo fetch
+          cargo clippy --all-targets --no-deps -- -Dwarnings
+          cargo build --release --target ${{ matrix.target }} --frozen
+        working-directory: bindings/python
 
       - name: Build wheels
-        run: |
-          source $HOME/.cargo/env
-          /opt/python/${{ matrix.python-abi }}/bin/maturin build \
-            --release \
-            --manifest-path bindings/python/Cargo.toml \
-            --strip \
-            --out dist \
-            --interpreter /opt/python/${{ matrix.python-abi }}/bin/python
+        uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist --manifest-path bindings/python/Cargo.toml --strip
+          sccache: 'true'
+          manylinux: auto
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-x86_64-${{ matrix.manylinux }}-py${{ matrix.python-version }}
-          path: dist
-       
+          name: wheels-${{ matrix.target }}-py${{ matrix.python-version }}
+          path: dist           
   windows:
     runs-on: windows-latest
     strategy:
