@@ -1,4 +1,4 @@
-name: build-python-wheels-1
+name: build-python-wheels
 
 on:
   workflow_dispatch:
@@ -39,11 +39,11 @@ jobs:
         if: matrix.target != 'universal2-apple-darwin'
         run: rustup target add ${{ matrix.target }}
 
-      - name: Build wheels with maturin
-        uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --manifest-path bindings/python/Cargo.toml --strip
+          args: --release --out dist --manifest-path bindings/python/Cargo.toml --strip -i ${{ matrix.python-version }}
           sccache: 'true'
 
       - name: Upload wheels
@@ -64,6 +64,9 @@ jobs:
           - x86_64-unknown-linux-gnu
           - aarch64-unknown-linux-gnu
           - armv7-unknown-linux-gnueabihf
+        manylinux:
+          - manylinux_2_34
+          - manylinux_2014
     steps:
       - name: Check out the main repository
         uses: actions/checkout@v4
@@ -100,15 +103,16 @@ jobs:
           CARGO_TARGET_DIR: ${{ github.workspace }}/target
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --manifest-path bindings/python/Cargo.toml --strip -i python3.11
+          args: --release --out dist --manifest-path bindings/python/Cargo.toml --strip -i ${{ matrix.python-version }}
           sccache: 'true'
-          manylinux: manylinux_2014
+          manylinux: ${{ matrix.manylinux }}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.target }}-py${{ matrix.python-version }}
+          name: wheels-${{ matrix.target }}-${{ matrix.manylinux }}-py${{ matrix.python-version }}
           path: dist           
+  
   windows:
     runs-on: windows-latest
     strategy:
@@ -151,10 +155,10 @@ jobs:
         working-directory: bindings/python
 
       - name: Build wheels
-        uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
+        uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --manifest-path bindings/python/Cargo.toml --frozen --strip
+          args: --release --out dist --manifest-path bindings/python/Cargo.toml --frozen --strip -i ${{ matrix.python-version }}
           sccache: 'true'
 
       - name: Upload wheels
