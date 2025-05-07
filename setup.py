@@ -36,6 +36,6 @@ setuptools.setup(
     "regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-macosx_11_0_arm64.whl ; sys_platform == 'darwin' and platform_machine == 'arm64' and python_version == '3.11'",
 
     # Optional: universal2 fallback (works for both arm64 and x86_64)
-    "regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl ; sys_platform == 'darwin' and python_version == '3.11'",
+    #"regorus @ https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/regorus-0.4.0-cp310-abi3-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl ; sys_platform == 'darwin' and python_version == '3.11'",
     ],
     )
