@@ -96,6 +96,7 @@ jobs:
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v1
+        if: matrix.manylinux == 'manylinux_2014'
   
       - name: Build wheels
         uses: PyO3/maturin-action@v1
