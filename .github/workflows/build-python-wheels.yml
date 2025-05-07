@@ -52,7 +52,7 @@ jobs:
           name: wheels-${{ matrix.target }}-py${{ matrix.python-version }}
           path: dist
 
-  linux:
+  llinux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -60,11 +60,21 @@ jobs:
           - '3.10'
           - '3.11'
           - '3.12'
-        target:
-          - x86_64-unknown-linux-gnu
-          - aarch64-unknown-linux-gnu
-          - armv7-unknown-linux-gnueabihf
+        manylinux:
+          - manylinux_2014
+          - manylinux_2_34
+    container:
+      image: quay.io/pypa/${{ matrix.manylinux }}_x86_64
+      options: --privileged  # Required for running auditwheel and QEMU
+
     steps:
+      - name: Install system dependencies
+        run: |
+          yum install -y git gcc gcc-c++ make openssl-devel
+          curl -sSf https://sh.rustup.rs | sh -s -- -y
+          source $HOME/.cargo/env
+          rustup show
+
       - name: Check out the main repository
         uses: actions/checkout@v4
 
@@ -75,31 +85,22 @@ jobs:
           path: .
           ref: main
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Rust target
-        run: rustup target add ${{ matrix.target }}
-
-      - name: Build Python extension (only native)
-        if: matrix.target == 'x86_64-unknown-linux-gnu'
+      - name: Set up Python ${{ matrix.python-version }}
         run: |
-          cargo fetch
-          cargo clippy --all-targets --no-deps -- -Dwarnings
-          cargo build --release --target ${{ matrix.target }} --frozen
-        working-directory: bindings/python
+          /opt/python/cp${{ matrix.python-version//./ }}-*/bin/pip install --upgrade pip setuptools wheel
 
-      - name: Build wheels
-        uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3 # v1.43.0
-        env:
-          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+      - name: Build wheels with maturin
+        uses: PyO3/maturin-action@63b75c597b83e247fbf4fb7719801cc4220ae9f3
         with:
-          target: ${{ matrix.target }}
+          target: x86_64-unknown-linux-gnu
           args: --release --out dist --manifest-path bindings/python/Cargo.toml --strip
-          sccache: 'true'
-          manylinux: auto
+          manylinux: ${{ matrix.manylinux }}
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-x86_64-${{ matrix.manylinux }}-py${{ matrix.python-version }}
+          path: dist
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
