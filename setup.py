@@ -2,6 +2,7 @@ import os
 import platform
 import subprocess
 import setuptools
+import sys
 
 """
 Ensures the "dist" directory exists to store the built package.
@@ -93,25 +94,46 @@ def get_glibc_version():
     # Default fallback - assume older glibc
     return "2.17"
 
+def get_python_version_for_wheel():
+    """
+    Returns the Python version suitable for wheel selection.
+    Returns string like "cp310", "cp311", "cp312"
+    """
+    python_version = sys.version_info
+    return f"cp{python_version.major}{python_version.minor}"
+
 # Determine appropriate wheel based on platform, architecture, and distro
-def get_appropriate_wheel():
+def get_appropriate_wheels():
+    """
+    Get a list of appropriate wheels for different Python versions
+    Returns a dictionary with Python version as key and wheel URL as value
+    """
     sys_platform = platform.system().lower()
     machine = platform.machine().lower()
-    py_version = platform.python_version()
+    current_py_version = get_python_version_for_wheel()
     
     # Base URL for all wheels
     base_url = "https://github.com/GCH-SC/regorus-wrapper/releases/download/0.4.0/"
     
-    # Windows wheel
+    # Python versions to support
+    python_versions = ["cp310", "cp311", "cp312"]
+    
+    # Store wheels for each Python version
+    wheels = {}
+    
+    # Windows wheels
     if sys_platform == 'windows' or sys_platform.startswith('win'):
-        return f"{base_url}regorus-0.4.0-cp310-abi3-win32.whl"
+        for py_ver in python_versions:
+            wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-win32.whl"
     
     # macOS wheels
     elif sys_platform == 'darwin':
         if machine == 'x86_64':
-            return f"{base_url}regorus-0.4.0-cp310-abi3-macosx_10_12_x86_64.whl"
+            for py_ver in python_versions:
+                wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-macosx_10_12_x86_64.whl"
         elif machine == 'arm64':
-            return f"{base_url}regorus-0.4.0-cp310-abi3-macosx_11_0_arm64.whl"
+            for py_ver in python_versions:
+                wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-macosx_11_0_arm64.whl"
     
     # Linux wheels
     elif sys_platform == 'linux':
@@ -121,25 +143,32 @@ def get_appropriate_wheel():
         
         print(f"Detected Linux distribution: {distro} {version}")
         print(f"Detected glibc version: {glibc_version}")
+        print(f"Current Python version: {current_py_version}")
         
         # Special case for Amazon Linux
         if distro == 'amzn':
             # Amazon Linux 2 should use manylinux2014 (glibc 2.17) compatible wheels
             if version == '2':
                 if machine == 'x86_64':
-                    return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+                    for py_ver in python_versions:
+                        wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
                 elif machine == 'aarch64':
-                    return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+                    for py_ver in python_versions:
+                        wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
                 elif machine == 'armv7l':
-                    return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl"
+                    for py_ver in python_versions:
+                        wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl"
             # Amazon Linux 2023 uses glibc 2.34, so can use the newer wheels
             elif version == '2023':
                 if machine == 'x86_64':
-                    return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_34_x86_64.whl"
+                    for py_ver in python_versions:
+                        wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_34_x86_64.whl"
                 elif machine == 'aarch64':
-                    return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_34_aarch64.whl"
+                    for py_ver in python_versions:
+                        wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_34_aarch64.whl"
                 elif machine == 'armv7l':
-                    return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_34_armv7l.whl"
+                    for py_ver in python_versions:
+                        wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_34_armv7l.whl"
         
         # Compare glibc versions to determine which manylinux to use
         use_newer_manylinux = False
@@ -152,31 +181,56 @@ def get_appropriate_wheel():
         # Modern distros likely using newer glibc (2.34+)
         if use_newer_manylinux or distro in ['ubuntu', 'debian', 'fedora', 'arch']:
             if machine == 'x86_64':
-                return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_34_x86_64.whl"
+                for py_ver in python_versions:
+                    wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_34_x86_64.whl"
             elif machine == 'aarch64':
-                return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_34_aarch64.whl"
+                for py_ver in python_versions:
+                    wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_34_aarch64.whl"
             elif machine == 'armv7l':
-                return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_34_armv7l.whl"
+                for py_ver in python_versions:
+                    wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_34_armv7l.whl"
         else:
             # Older distros - use manylinux2014 (glibc 2.17)
             if machine == 'x86_64':
-                return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+                for py_ver in python_versions:
+                    wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
             elif machine == 'aarch64':
-                return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+                for py_ver in python_versions:
+                    wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
             elif machine == 'armv7l':
-                return f"{base_url}regorus-0.4.0-cp310-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl"
+                for py_ver in python_versions:
+                    wheels[py_ver] = f"{base_url}regorus-0.4.0-{py_ver}-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl"
     
-    # Default - return None if no appropriate wheel found
-    return None
+    return wheels
 
-# Determine dependencies based on environment
-dependencies = ["wheel"]
-appropriate_wheel = get_appropriate_wheel()
-if appropriate_wheel:
-    dependencies.append(f"regorus @ {appropriate_wheel}")
-else:
-    print("Warning: Could not determine appropriate wheel for this platform.")
-    # You might want to use a fallback wheel here
+# Create version-specific install dependencies
+def generate_python_specific_dependencies():
+    """
+    Generates the dependencies list with version-specific constraints
+    """
+    wheels = get_appropriate_wheels()
+    current_py_version = get_python_version_for_wheel()
+    
+    dependencies = ["wheel"]
+    
+    if not wheels:
+        print("Warning: Could not determine appropriate wheels for this platform.")
+        return dependencies
+    
+    # For each Python version, add a conditional dependency
+    for py_ver, wheel in wheels.items():
+        # Convert cp310 to 3.10, cp311 to 3.11, etc.
+        py_ver_str = f"{py_ver[2]}.{py_ver[3:]}"
+        
+        # Add conditional dependency
+        dependencies.append(
+            f"regorus @ {wheel} ; python_version == '{py_ver_str}'"
+        )
+    
+    return dependencies
+
+# Get the dependencies with specific Python version constraints
+dependencies = generate_python_specific_dependencies()
 
 setuptools.setup(
     name="regorus-wrapper",
